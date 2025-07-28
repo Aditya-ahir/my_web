@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Study Materials | BIO-TECH</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #000428, #004e92);
+      color: white;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.07);
+      padding: 30px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #uploadSection {
+      display: none;
+      margin-bottom: 30px;
+    }
+
+    input[type="file"], button {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      background: #00ffff;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hidden-chat-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #00ffff;
+      color: black;
+      border: none;
+      padding: 12px 18px;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📚 Study Materials</h2>
+
+    <div id="uploadSection">
+      <input type="file" id="fileInput" />
+      <button onclick="uploadFile()">Upload File</button>
+    </div>
+
+    <h3>Available Files:</h3>
+    <ul id="fileList">Loading files...</ul>
+  </div>
+
+  <button class="hidden-chat-btn" onclick="openChatAccess()">Help 💬</button>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://epqoptvpqelkavuhrmcy.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwcW9wdHZwcWVsa2F2dWhybWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MTQ0ODgsImV4cCI6MjA2OTI5MDQ4OH0.qe5dCC-fQExGu37QFCvT0aY1VhlAfPfAKA1j0Ln_OLA'
+    );
+
+    const ADMIN_UID = "5d82c113-10b3-46f6-bcc0-6523558ad50a";
+
+    async function init() {
+      const {
+        data: { user }
+      } = await supabase.auth.getUser();
+
+      if (user?.id === ADMIN_UID) {
+        document.getElementById("uploadSection").style.display = "block";
+      }
+
+      listFiles();
+    }
+
+    async function uploadFile() {
+      const fileInput = document.getElementById("fileInput");
+      if (!fileInput.files.length) return alert("Please select a file.");
+      const file = fileInput.files[0];
+
+      const { data, error } = await supabase.storage
+        .from("study-materials")
+        .upload(`materials/${Date.now()}_${file.name}`, file);
+
+      if (error) {
+        alert("Upload failed: " + error.message);
+      } else {
+        alert("File uploaded successfully!");
+        fileInput.value = "";
+        listFiles();
+      }
+    }
+
+    async function listFiles() {
+      const { data, error } = await supabase.storage
+        .from("study-materials")
+        .list("materials", { limit: 100 });
+
+      const fileList = document.getElementById("fileList");
+      fileList.innerHTML = "";
+
+      if (error || !data.length) {
+        fileList.innerHTML = "<li>No files found.</li>";
+        return;
+      }
+
+      data.forEach(async file => {
+        const { data: urlData } = await supabase.storage
+          .from("study-materials")
+          .createSignedUrl(`materials/${file.name}`, 60 * 60);
+
+        const li = document.createElement("li");
+        li.innerHTML = `
+          ${file.name}
+          <a href="${urlData.signedUrl}" target="_blank" download>📥 Download</a>
+        `;
+        fileList.appendChild(li);
+      });
+    }
+
+    function openChatAccess() {
+      const password = prompt("Enter Help Chat Password:");
+      if (password === "biotech123") {
+        window.location.href = "chat.html";
+      } else {
+        alert("Incorrect password.");
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
