@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Access | BIO-TECH</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+    input, button {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      margin: 10px 0;
+      width: 100%;
+    }
+    button {
+      background: #00ffff;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔒 Enter Access Key</h2>
+    <input type="password" id="accessKey" placeholder="Access Key" />
+    <button onclick="checkKey()">Enter</button>
+    <p id="error" style="color:red;"></p>
+  </div>
+
+  <script>
+    const MASTER_KEY = "biotech123"; // 🔑 Change this to your access key
+
+    function checkKey() {
+      const inputKey = document.getElementById("accessKey").value;
+      if (inputKey === MASTER_KEY) {
+        window.location.href = "auth.html"; // redirect to login/signup screen
+      } else {
+        document.getElementById("error").textContent = "Incorrect key!";
+      }
+    }
+  </script>
+</body>
+</html>
